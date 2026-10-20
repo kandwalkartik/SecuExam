@@ -2,6 +2,20 @@
 
 Secure exam paper distribution system built with Flask, SQLite, and a static HTML/CSS/JS frontend.
 
+## Problem and approach
+
+Exam papers need to reach authorized recipients at the right time, while leaving a record of who accessed them. SecuExam models that workflow with separate setter, receiver, and administrator roles. A setter uploads a paper; the server stores encrypted content and enforces a release time; a receiver downloads a watermarked copy; and an administrator reviews users and audit events.
+
+```text
+Setter upload -> Flask API -> encrypted storage + SQLite metadata
+                                      |
+                           release-time and role checks
+                                      |
+Receiver download <- watermarked PDF <- authorized request
+                                      |
+                               audit log / admin view
+```
+
 ## What is included
 
 - Role-based flows for `setter`, `receiver`, and `admin`
@@ -18,28 +32,33 @@ Secure exam paper distribution system built with Flask, SQLite, and a static HTM
 - `test_secuexam.py`: Selenium test suite
 - `reset_demo_state.py`: cleanup/reset utility for generated local state
 - `generate_final_report.py`: generator for the final SecuExam documentation PDF
-- `SecuExam_Final_Project_Report.pdf`: generated final project report
+- `SecuExam_Final_Project_Report.pdf`: optional output from the report generator (not committed)
 
 ## Local setup
 
+From the cloned repository root, create an isolated Python environment and install the app dependencies:
+
 ```bash
-cd /Users/akshat/SOFTWARE_COURSE_BASED\ PROJECT
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+python -m venv .venv
 ```
 
-Chrome or Safari WebDriver support is required for the Selenium suite.
+Activate it with `.venv\Scripts\Activate.ps1` on Windows PowerShell or `source .venv/bin/activate` on macOS/Linux, then run:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+For the browser test suite, also install Selenium with `python -m pip install selenium` and have Chrome or Safari WebDriver available. Selenium is not included in `requirements.txt`.
 
 ## Run the app
 
 ```bash
-cd /Users/akshat/SOFTWARE_COURSE_BASED\ PROJECT
-source venv/bin/activate
 python server.py
 ```
 
 Default URL: `http://127.0.0.1:5050`
+
+The server currently binds to all network interfaces and seeds known demo passwords. Run it only in a trusted local environment; this setup is not suitable for a public deployment.
 
 ## Open It On Your Phone
 
@@ -48,16 +67,12 @@ SecuExam now includes installable PWA support, so it can behave like a mobile ap
 1. Start the server:
 
 ```bash
-cd /Users/akshat/SOFTWARE_COURSE_BASED\ PROJECT
-source venv/bin/activate
 python server.py
 ```
 
 2. In another terminal, print the phone-friendly access URL:
 
 ```bash
-cd /Users/akshat/SOFTWARE_COURSE_BASED\ PROJECT
-source venv/bin/activate
 python print_mobile_access.py
 ```
 
@@ -68,15 +83,11 @@ python print_mobile_access.py
 - iPhone / iPad Safari: `Share` -> `Add to Home Screen`
 - Android Chrome: `Install app` or `Add to Home screen`
 
-For a public HTTPS demo link, you can also run:
-
-```bash
-npx localtunnel --port 5050
-```
-
-Keep the Flask server running while using the phone app.
+Keep the Flask server running while using the phone app, and use this demo only on a trusted network.
 
 ## Demo accounts
+
+These credentials are seeded for local demonstration and automated tests only. Do not expose the demo server to the internet with these accounts enabled.
 
 - `admin@secuexam.in` / `admin123`
 - `setter@vit.ac.in` / `setter123`
@@ -87,8 +98,6 @@ Keep the Flask server running while using the phone app.
 Use this if you want to clear the local DB, uploaded encrypted files, screenshots, and caches, then restore the default seeded users.
 
 ```bash
-cd /Users/akshat/SOFTWARE_COURSE_BASED\ PROJECT
-source venv/bin/activate
 python reset_demo_state.py
 ```
 
@@ -104,25 +113,23 @@ Stop the running Flask server before performing a real reset.
 ## Run tests
 
 ```bash
-cd /Users/akshat/SOFTWARE_COURSE_BASED\ PROJECT
-source venv/bin/activate
 python test_secuexam.py
 ```
 
-Current verified result in this workspace: `34/34 tests passed`.
+Start the app in another terminal before running the suite. The repository reports a previous run of `34/34 tests passed`; this is not a current CI result.
+
+## Demo and limitations
+
+- The app is a local prototype. Its seeded demo accounts, SQLite storage, and current server configuration require hardening before public use.
+- The browser tests require a separate Selenium install and an available WebDriver.
+- There is no hosted demo or committed screenshot gallery. The Selenium suite saves screenshots locally in `test_screenshots/` when run.
 
 ## Final report
 
-The final project documentation PDF is available at:
-
-```bash
-/Users/akshat/SOFTWARE_COURSE_BASED PROJECT/SecuExam_Final_Project_Report.pdf
-```
+The final project documentation PDF is generated locally and is not committed to the repository.
 
 To regenerate it:
 
 ```bash
-cd /Users/akshat/SOFTWARE_COURSE_BASED\ PROJECT
-source venv/bin/activate
 python generate_final_report.py
 ```
